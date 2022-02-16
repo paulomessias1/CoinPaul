@@ -21,15 +21,34 @@ const getEthereumContract = () => {
 }
 export const TransactionProvider = ({ children }) => {
 
-    const [connectedAccount, setConnectedAccount] = useState(initialState)
+    const [currentAccount, setCurrentAccount] = useState('');
+    const [formData, setFormData] = useState({addressTo: '', amount: '', keyword: '', message: ''  });
+
+    const handleChange =(e, nome) =>{
+        setFormData ((prevState) => ({ ...prevState, [nome]: e.target.value}));
+    }
 
     const checkIfWalletIsConnected = async () => {
-        if (!ethereum) return alert("Please install MetaMask");
+        try {
+            if (!ethereum) return alert("Please install MetaMask");
 
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
+            const accounts = await ethereum.request({ method: 'eth_accounts' });
 
-        console.log(accounts);
+            if (accounts.length) {
+                setCurrentAccount(accounts[0]);
+
+                // getALLTransactions();       
+            } else {
+                console.log('No accounts found');
+            }
+        } catch (error) {
+            console.log(error);
+
+            throw new Error("No ethereum object.")
+
+        }
     }
+
 
     const connectWallet = async () => {
         try {
@@ -46,12 +65,26 @@ export const TransactionProvider = ({ children }) => {
 
     }
 
+    const sentTransaction = async () => {
+        try {
+            if (!ethereum) return alert("Please install MetaMask");
+            
+            //get the data from the form...
+        } catch (error) {
+            console.log(error);
+
+            throw new Error("No ethereum object.")
+        }
+
+    }
+
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
 
     return (
-        <TransactionContext.Provider value={{ connectWallet }}>
+        <TransactionContext.Provider value={{ connectWallet, currentAccount, setFormData, handleChange }}>
             {children}
         </TransactionContext.Provider>
     )
